@@ -1,0 +1,15 @@
+import React,{createContext,useContext,useEffect,useState} from 'react';
+import {request} from '../lib/api';
+const Context=createContext(null);
+export function AuthProvider({children}){const [user,setUser]=useState(null),[loading,setLoading]=useState(true);
+const refresh=async()=>{try{const r=await request('/auth/me');
+setUser(r.user)}catch{setUser(null)}finally{setLoading(false)}};
+useEffect(()=>{refresh()},[]);
+const login=async(email,password)=>{const r=await request('/auth/login',{method:'POST',body:JSON.stringify({email,password})});
+setUser(r.user)};
+const signup=async(name,email,password)=>{const r=await request('/auth/signup',{method:'POST',body:JSON.stringify({name,email,password})});
+setUser(r.user)};
+const logout=async()=>{await request('/auth/logout',{method:'POST'});
+setUser(null)};
+return <Context.Provider value={{user,loading,login,signup,logout,refresh}}>{children}</Context.Provider>};
+export const useAuth=()=>useContext(Context);
